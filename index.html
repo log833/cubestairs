@@ -401,28 +401,28 @@ function loadLevel(level){
     // ===== LEVEL 1 =====
     if(level === 1){
 
-        spawn.set(0,4,5);
+        spawn.set(0,4,8);
 
-        addBox(0,-0.5,-10,24,1,60,0x228822);
+        addBox(0,-0.5,-10,30,1,70,0x228822);
 
-        addBox(0,1,0,6,1,6,0xff4444);
-        addBox(0,3,-6,6,1,6,0xff8844);
-        addBox(0,5,-12,6,1,6,0xffff44);
-        addBox(0,7,-18,6,1,6,0x44ff44);
-        addBox(0,9,-24,6,1,6,0x44ffff);
+        addBox(0,1,0,8,1,8,0xff4444);
+        addBox(0,2.5,-6,8,1,8,0xff8844);
+        addBox(0,4,-12,8,1,8,0xffff44);
+        addBox(0,5.5,-18,8,1,8,0x44ff44);
+        addBox(0,7,-24,8,1,8,0x44ffff);
 
         addCoin(0,3,0);
-        addCoin(0,5,-6);
-        addCoin(0,7,-12);
-        addCoin(0,9,-18);
+        addCoin(0,4.5,-6);
+        addCoin(0,6,-12);
+        addCoin(0,7.5,-18);
 
         finish = addBox(
             0,
-            11,
+            9,
             -30,
-            8,
+            10,
             1,
-            8,
+            10,
             0x00ffff
         );
     }
@@ -430,30 +430,30 @@ function loadLevel(level){
     // ===== LEVEL 2 =====
     if(level === 2){
 
-        spawn.set(0,4,5);
+        spawn.set(0,4,8);
 
-        addBox(0,-0.5,-15,28,1,70,0x444444);
+        addBox(0,-0.5,-15,35,1,90,0x444444);
 
-        addBox(0,1,0,6,1,6,0xff0000);
-        addBox(-6,3,-6,6,1,6,0x00ff00);
-        addBox(6,5,-12,6,1,6,0x0000ff);
-        addBox(-6,7,-18,6,1,6,0xffff00);
-        addBox(6,9,-24,6,1,6,0xff00ff);
-        addBox(0,11,-30,6,1,6,0x00ffff);
+        addBox(0,1,0,8,1,8,0xff0000);
+        addBox(0,2.5,-6,8,1,8,0xff5500);
+        addBox(0,4,-12,8,1,8,0x0000ff);
+        addBox(0,5.5,-18,8,1,8,0x00ff00);
+        addBox(0,7,-24,8,1,8,0xffff00);
+        addBox(0,8.5,-30,8,1,8,0xff00ff);
 
         addCoin(0,3,0);
-        addCoin(-6,5,-6);
-        addCoin(6,7,-12);
-        addCoin(-6,9,-18);
-        addCoin(6,11,-24);
+        addCoin(0,4.5,-6);
+        addCoin(0,6,-12);
+        addCoin(0,7.5,-18);
+        addCoin(0,9,-24);
 
         finish = addBox(
             0,
-            13,
+            10.5,
             -36,
-            8,
+            10,
             1,
-            8,
+            10,
             0xffffff
         );
     }
@@ -461,33 +461,68 @@ function loadLevel(level){
     // ===== LEVEL 3 =====
     if(level === 3){
 
-        spawn.set(0,4,5);
+        spawn.set(0,4,8);
 
-        addBox(0,-0.5,-20,34,1,90,0x333333);
+        addBox(0,-0.5,-20,40,1,110,0x333333);
 
-        addBox(0,1,0,6,1,6,0xff5555);
-        addBox(5,3,-6,6,1,6,0xff9955);
-        addBox(-5,5,-12,6,1,6,0xffff55);
-        addBox(5,7,-18,6,1,6,0x55ff55);
-        addBox(-5,9,-24,6,1,6,0x55ffff);
-        addBox(5,11,-30,6,1,6,0x5555ff);
-        addBox(0,13,-36,6,1,6,0xff55ff);
+        addBox(0,1,0,8,1,8,0xff5555);
+        addBox(0,2.5,-6,8,1,8,0xff9955);
+        addBox(0,4,-12,8,1,8,0xffff55);
+        addBox(0,5.5,-18,8,1,8,0x55ff55);
+        addBox(0,7,-24,8,1,8,0x55ffff);
+        addBox(0,8.5,-30,8,1,8,0x5555ff);
+        addBox(0,10,-36,8,1,8,0xff55ff);
 
         addCoin(0,3,0);
-        addCoin(5,5,-6);
-        addCoin(-5,7,-12);
-        addCoin(5,9,-18);
-        addCoin(-5,11,-24);
-        addCoin(5,13,-30);
+        addCoin(0,4.5,-6);
+        addCoin(0,6,-12);
+        addCoin(0,7.5,-18);
+        addCoin(0,9,-24);
+        addCoin(0,10.5,-30);
 
         finish = addBox(
             0,
-            15,
+            12,
             -42,
-            10,
+            12,
             1,
-            10,
+            12,
             0xffffff
+        );
+    }
+
+    // ===== LEVEL 4 =====
+    if(level === 4){
+
+        spawn.set(0,4,8);
+
+        addBox(0,-0.5,-25,45,1,130,0x222222);
+
+        addBox(0,1,0,8,1,8,0xff4444);
+        addBox(0,2.5,-6,8,1,8,0xff7744);
+        addBox(0,4,-12,8,1,8,0xffdd44);
+        addBox(0,5.5,-18,8,1,8,0x88ff44);
+        addBox(0,7,-24,8,1,8,0x44ffcc);
+        addBox(0,8.5,-30,8,1,8,0x4488ff);
+        addBox(0,10,-36,8,1,8,0xaa44ff);
+        addBox(0,11.5,-42,8,1,8,0xff44aa);
+
+        addCoin(0,3,0);
+        addCoin(0,4.5,-6);
+        addCoin(0,6,-12);
+        addCoin(0,7.5,-18);
+        addCoin(0,9,-24);
+        addCoin(0,10.5,-30);
+        addCoin(0,12,-36);
+
+        finish = addBox(
+            0,
+            13.5,
+            -48,
+            12,
+            1,
+            12,
+            0x00ffff
         );
     }
 
@@ -651,7 +686,7 @@ function animate(){
 
         currentLevel++;
 
-        if(currentLevel > 3){
+        if(currentLevel > 4){
 
             currentLevel = 1;
         }
