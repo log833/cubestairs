@@ -25,6 +25,10 @@ body{
     z-index:10;
 }
 
+#ui h2{
+    margin:0 0 8px 0;
+}
+
 #joystick{
     position:absolute;
     left:30px;
@@ -67,9 +71,9 @@ body{
 <body>
 
 <div id="ui">
+<h2>CubeStairs</h2>
 <div id="coins">Coins: 0</div>
 <div id="level">Level: 1</div>
-<div>WARNING: The Joystick Can Confuse U</div>
 </div>
 
 <div id="joystick">
@@ -397,32 +401,28 @@ function loadLevel(level){
     // ===== LEVEL 1 =====
     if(level === 1){
 
-        spawn.set(0,4,0);
+        spawn.set(0,4,5);
 
-        // Ground
-        addBox(0,-0.5,0,20,1,40,0x22aa22);
+        addBox(0,-0.5,-10,24,1,60,0x228822);
 
-        // Stairs
-        addBox(0,1,0,4,1,4,0x00ff00);
-        addBox(0,3,-5,4,1,4,0xff4444);
-        addBox(0,5,-10,4,1,4,0x4444ff);
-        addBox(0,7,-15,4,1,4,0xffff00);
-        addBox(0,9,-20,4,1,4,0xff8800);
+        addBox(0,1,0,6,1,6,0xff4444);
+        addBox(0,3,-6,6,1,6,0xff8844);
+        addBox(0,5,-12,6,1,6,0xffff44);
+        addBox(0,7,-18,6,1,6,0x44ff44);
+        addBox(0,9,-24,6,1,6,0x44ffff);
 
-        // Coins
         addCoin(0,3,0);
-        addCoin(0,5,-5);
-        addCoin(0,7,-10);
-        addCoin(0,9,-15);
+        addCoin(0,5,-6);
+        addCoin(0,7,-12);
+        addCoin(0,9,-18);
 
-        // Finish
         finish = addBox(
             0,
             11,
-            -25,
-            5,
+            -30,
+            8,
             1,
-            5,
+            8,
             0x00ffff
         );
     }
@@ -430,33 +430,64 @@ function loadLevel(level){
     // ===== LEVEL 2 =====
     if(level === 2){
 
-        spawn.set(0,4,0);
+        spawn.set(0,4,5);
 
-        // Ground
-        addBox(0,-0.5,0,24,1,50,0x333333);
+        addBox(0,-0.5,-15,28,1,70,0x444444);
 
-        // Zigzag stairs
-        addBox(0,2,-5,4,1,4,0xff0000);
-        addBox(-5,4,-10,4,1,4,0x00ff00);
-        addBox(5,6,-15,4,1,4,0x0000ff);
-        addBox(-5,8,-20,4,1,4,0xffff00);
-        addBox(5,10,-25,4,1,4,0xff00ff);
+        addBox(0,1,0,6,1,6,0xff0000);
+        addBox(-6,3,-6,6,1,6,0x00ff00);
+        addBox(6,5,-12,6,1,6,0x0000ff);
+        addBox(-6,7,-18,6,1,6,0xffff00);
+        addBox(6,9,-24,6,1,6,0xff00ff);
+        addBox(0,11,-30,6,1,6,0x00ffff);
 
-        // Coins
-        addCoin(0,4,-5);
-        addCoin(-5,6,-10);
-        addCoin(5,8,-15);
-        addCoin(-5,10,-20);
+        addCoin(0,3,0);
+        addCoin(-6,5,-6);
+        addCoin(6,7,-12);
+        addCoin(-6,9,-18);
+        addCoin(6,11,-24);
 
-        // Finish
         finish = addBox(
-            5,
-            12,
-            -30,
-            5,
+            0,
+            13,
+            -36,
+            8,
             1,
-            5,
-            0x00ffff
+            8,
+            0xffffff
+        );
+    }
+
+    // ===== LEVEL 3 =====
+    if(level === 3){
+
+        spawn.set(0,4,5);
+
+        addBox(0,-0.5,-20,34,1,90,0x333333);
+
+        addBox(0,1,0,6,1,6,0xff5555);
+        addBox(5,3,-6,6,1,6,0xff9955);
+        addBox(-5,5,-12,6,1,6,0xffff55);
+        addBox(5,7,-18,6,1,6,0x55ff55);
+        addBox(-5,9,-24,6,1,6,0x55ffff);
+        addBox(5,11,-30,6,1,6,0x5555ff);
+        addBox(0,13,-36,6,1,6,0xff55ff);
+
+        addCoin(0,3,0);
+        addCoin(5,5,-6);
+        addCoin(-5,7,-12);
+        addCoin(5,9,-18);
+        addCoin(-5,11,-24);
+        addCoin(5,13,-30);
+
+        finish = addBox(
+            0,
+            15,
+            -42,
+            10,
+            1,
+            10,
+            0xffffff
         );
     }
 
@@ -534,16 +565,16 @@ function animate(){
         player.position.z += speed;
     }
 
-    // ===== JOYSTICK MOVEMENT =====
+    // ===== FIXED CAMERA-RELATIVE JOYSTICK =====
     const moveX = joyX;
-    const moveZ = joyY;
+    const moveZ = -joyY;
 
     player.position.x +=
-        (moveX * Math.cos(cameraAngle) +
+        (moveX * Math.cos(cameraAngle) -
         moveZ * Math.sin(cameraAngle)) * speed;
 
     player.position.z +=
-        (moveZ * Math.cos(cameraAngle) -
+        (moveZ * Math.cos(cameraAngle) +
         moveX * Math.sin(cameraAngle)) * speed;
 
     // ===== GRAVITY =====
@@ -620,7 +651,7 @@ function animate(){
 
         currentLevel++;
 
-        if(currentLevel > 2){
+        if(currentLevel > 3){
 
             currentLevel = 1;
         }
