@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CubeStairs</title>
+
+<style>
+body{
+    margin:0;
+    overflow:hidden;
+    background:black;
+    font-family:Arial,sans-serif;
+    touch-action:none;
+}
+
+#ui{
+    position:absolute;
+    top:10px;
+    left:10px;
+    color:white;
+    background:rgba(0,0,0,0.5);
+    padding:12px;
+    border-radius:12px;
+    z-index:10;
+}
+
+#joystick{
+    position:absolute;
+    left:30px;
+    bottom:30px;
+    width:140px;
+    height:140px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.12);
+    border:3px solid white;
+    z-index:20;
+    touch-action:none;
+}
+
+#stick{
+    position:absolute;
+    left:35px;
+    top:35px;
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.45);
+    border:2px solid white;
+}
+
+#jump{
+    position:absolute;
+    right:30px;
+    bottom:40px;
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    border:3px solid white;
+    background:rgba(0,150,255,0.4);
+    color:white;
+    font-size:22px;
+    z-index:20;
+}
+</style>
+</head>
+<body>
+
+<div id="ui">
+<div id="coins">Coins: 0</div>
+<div id="level">Level: 1</div>
+<div>WARNING: The Joystick Can Confuse U</div>
+</div>
+
+<div id="joystick">
+    <div id="stick"></div>
+</div>
+
+<button id="jump">^</button>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js';
+
+// ===== SCENE =====
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
+
+// ===== CAMERA =====
+const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth/window.innerHeight,
+    0.1,
+    1000
+);
+
+// ===== RENDERER =====
+const renderer = new THREE.WebGLRenderer({
+    antialias:true
+});
+
+renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+);
+
+document.body.appendChild(renderer.domElement);
+
+// ===== LIGHT =====
+scene.add(
+    new THREE.AmbientLight(0xffffff,0.6)
+);
+
+const light = new THREE.DirectionalLight(
+    0xffffff,
+    1
+);
+
+light.position.set(5,10,7);
+
+scene.add(light);
+
+// ===== PLAYER =====
+const player = new THREE.Mesh(
+    new THREE.BoxGeometry(1,2,1),
+    new THREE.MeshStandardMaterial({
+        color:0xff8844
+    })
+);
+
+scene.add(player);
+
+// ===== VARIABLES =====
+let velocityY = 0;
+let onGround = false;
+let score = 0;
+let currentLevel = 1;
+
+const keys = {};
+
+let spawn = new THREE.Vector3(0,4,0);
+
+const coinText =
+    document.getElementById("coins");
+
+const levelText =
+    document.getElementById("level");
+
+// ===== CAMERA ROTATION =====
+let cameraAngle = 0;
+
+let isDragging = false;
+
+let lastTouchX = 0;
+
+// ===== CAMERA INPUT =====
+window.addEventListener("mousedown",(e)=>{
+
+    if(e.target.id === "jump") return;
+
+    isDragging = true;
+
+    lastTouchX = e.clientX;
+});
+
+window.addEventListener("mouseup",()=>{
+
+    isDragging = false;
+});
+
+window.addEventListener("mousemove",(e)=>{
+
+    if(!isDragging) return;
+
+    const deltaX =
+        e.clientX - lastTouchX;
+
+    cameraAngle -= deltaX * 0.01;
+
+    lastTouchX = e.clientX;
+});
+
+// ===== TOUCH CAMERA =====
+window.addEventListener("touchstart",(e)=>{
+
+    if(
+        e.target.id === "jump" ||
+        e.target.id === "joystick" ||
+        e.target.id === "stick"
+    ) return;
+
+    isDragging = true;
+
+    lastTouchX =
+        e.touches[0].clientX;
+});
+
+window.addEventListener("touchend",()=>{
+
+    isDragging = false;
+});
+
+window.addEventListener("touchmove",(e)=>{
+
+    if(!isDragging) return;
+
+    const x =
+        e.touches[0].clientX;
+
+    const deltaX = x - lastTouchX;
+
+    cameraAngle -= deltaX * 0.01;
+
+    lastTouchX = x;
+});
+
+// ===== KEYBOARD =====
+document.addEventListener("keydown",(e)=>{
+
+    keys[e.key.toLowerCase()] = true;
+});
+
+document.addEventListener("keyup",(e)=>{
+
+    keys[e.key.toLowerCase()] = false;
+});
+
+// ===== JUMP BUTTON =====
+const jumpBtn =
+    document.getElementById("jump");
+
+jumpBtn.addEventListener("touchstart",(e)=>{
+
+    e.preventDefault();
+
+    keys[" "] = true;
+});
+
+jumpBtn.addEventListener("touchend",(e)=>{
+
+    e.preventDefault();
+
+    keys[" "] = false;
+});
+
+// ===== JOYSTICK =====
+const joystick =
+    document.getElementById("joystick");
+
+const stick =
+    document.getElementById("stick");
+
+let joyX = 0;
+let joyY = 0;
+
+let joystickActive = false;
+
+function moveStick(clientX, clientY){
+
+    const rect =
+        joystick.getBoundingClientRect();
+
+    const centerX =
+        rect.left + rect.width / 2;
+
+    const centerY =
+        rect.top + rect.height / 2;
+
+    let dx = clientX - centerX;
+    let dy = clientY - centerY;
+
+    const distance =
+        Math.sqrt(dx * dx + dy * dy);
+
+    const maxDistance = 40;
+
+    if(distance > maxDistance){
+
+        dx = dx / distance * maxDistance;
+        dy = dy / distance * maxDistance;
+    }
+
+    stick.style.left =
+        (35 + dx) + "px";
+
+    stick.style.top =
+        (35 + dy) + "px";
+
+    joyX = dx / maxDistance;
+    joyY = dy / maxDistance;
+}
+
+function resetStick(){
+
+    stick.style.left = "35px";
+    stick.style.top = "35px";
+
+    joyX = 0;
+    joyY = 0;
+}
+
+joystick.addEventListener("touchstart",(e)=>{
+
+    joystickActive = true;
+
+    moveStick(
+        e.touches[0].clientX,
+        e.touches[0].clientY
+    );
+});
+
+window.addEventListener("touchmove",(e)=>{
+
+    if(!joystickActive) return;
+
+    moveStick(
+        e.touches[0].clientX,
+        e.touches[0].clientY
+    );
+});
+
+window.addEventListener("touchend",()=>{
+
+    joystickActive = false;
+
+    resetStick();
+});
+
+// ===== LEVEL OBJECTS =====
+let levelObjects = [];
+let coins = [];
+let finish;
+
+// ===== CREATE LEVEL =====
+function clearLevel(){
+
+    for(const obj of levelObjects){
+
+        scene.remove(obj);
+    }
+
+    levelObjects = [];
+    coins = [];
+}
+
+function addBox(x,y,z,w,h,d,color){
+
+    const mesh = new THREE.Mesh(
+
+        new THREE.BoxGeometry(w,h,d),
+
+        new THREE.MeshStandardMaterial({
+            color:color
+        })
+    );
+
+    mesh.position.set(x,y,z);
+
+    scene.add(mesh);
+
+    levelObjects.push(mesh);
+
+    return mesh;
+}
+
+function addCoin(x,y,z){
+
+    const coin = new THREE.Mesh(
+
+        new THREE.CylinderGeometry(
+            0.5,
+            0.5,
+            0.2,
+            20
+        ),
+
+        new THREE.MeshStandardMaterial({
+            color:0xffdd00,
+            emissive:0xaa8800
+        })
+    );
+
+    coin.rotation.z = Math.PI / 2;
+
+    coin.position.set(x,y,z);
+
+    scene.add(coin);
+
+    levelObjects.push(coin);
+
+    coins.push(coin);
+}
+
+function loadLevel(level){
+
+    clearLevel();
+
+    // ===== LEVEL 1 =====
+    if(level === 1){
+
+        spawn.set(0,4,0);
+
+        // Ground
+        addBox(0,-0.5,0,20,1,40,0x22aa22);
+
+        // Stairs
+        addBox(0,1,0,4,1,4,0x00ff00);
+        addBox(0,3,-5,4,1,4,0xff4444);
+        addBox(0,5,-10,4,1,4,0x4444ff);
+        addBox(0,7,-15,4,1,4,0xffff00);
+        addBox(0,9,-20,4,1,4,0xff8800);
+
+        // Coins
+        addCoin(0,3,0);
+        addCoin(0,5,-5);
+        addCoin(0,7,-10);
+        addCoin(0,9,-15);
+
+        // Finish
+        finish = addBox(
+            0,
+            11,
+            -25,
+            5,
+            1,
+            5,
+            0x00ffff
+        );
+    }
+
+    // ===== LEVEL 2 =====
+    if(level === 2){
+
+        spawn.set(0,4,0);
+
+        // Ground
+        addBox(0,-0.5,0,24,1,50,0x333333);
+
+        // Zigzag stairs
+        addBox(0,2,-5,4,1,4,0xff0000);
+        addBox(-5,4,-10,4,1,4,0x00ff00);
+        addBox(5,6,-15,4,1,4,0x0000ff);
+        addBox(-5,8,-20,4,1,4,0xffff00);
+        addBox(5,10,-25,4,1,4,0xff00ff);
+
+        // Coins
+        addCoin(0,4,-5);
+        addCoin(-5,6,-10);
+        addCoin(5,8,-15);
+        addCoin(-5,10,-20);
+
+        // Finish
+        finish = addBox(
+            5,
+            12,
+            -30,
+            5,
+            1,
+            5,
+            0x00ffff
+        );
+    }
+
+    player.position.copy(spawn);
+}
+
+loadLevel(1);
+
+// ===== RESPAWN =====
+function respawn(){
+
+    player.position.copy(spawn);
+
+    velocityY = 0;
+}
+
+// ===== COLLISION =====
+function collide(box){
+
+    const px = player.position.x;
+    const py = player.position.y;
+    const pz = player.position.z;
+
+    const bx = box.position.x;
+    const by = box.position.y;
+    const bz = box.position.z;
+
+    const sx = box.geometry.parameters.width;
+    const sy = box.geometry.parameters.height;
+    const sz = box.geometry.parameters.depth;
+
+    if(
+
+        Math.abs(px - bx) < sx/2 &&
+        Math.abs(pz - bz) < sz/2 &&
+
+        py - 1 <= by + sy/2 &&
+        py - 1 >= by &&
+
+        velocityY <= 0
+    ){
+
+        player.position.y =
+            by + sy/2 + 1;
+
+        velocityY = 0;
+
+        onGround = true;
+    }
+}
+
+// ===== GAME LOOP =====
+function animate(){
+
+    requestAnimationFrame(animate);
+
+    onGround = false;
+
+    const speed = 0.12;
+
+    // ===== KEYBOARD MOVEMENT =====
+    if(keys["a"]){
+        player.position.x -= speed;
+    }
+
+    if(keys["d"]){
+        player.position.x += speed;
+    }
+
+    if(keys["w"]){
+        player.position.z -= speed;
+    }
+
+    if(keys["s"]){
+        player.position.z += speed;
+    }
+
+    // ===== JOYSTICK MOVEMENT =====
+    const moveX = joyX;
+    const moveZ = joyY;
+
+    player.position.x +=
+        (moveX * Math.cos(cameraAngle) +
+        moveZ * Math.sin(cameraAngle)) * speed;
+
+    player.position.z +=
+        (moveZ * Math.cos(cameraAngle) -
+        moveX * Math.sin(cameraAngle)) * speed;
+
+    // ===== GRAVITY =====
+    velocityY -= 0.01;
+
+    player.position.y += velocityY;
+
+    // ===== COLLISION =====
+    for(const obj of levelObjects){
+
+        if(obj.geometry.type === "BoxGeometry"){
+
+            collide(obj);
+        }
+    }
+
+    // ===== JUMP =====
+    if(
+        keys[" "] &&
+        onGround
+    ){
+        velocityY = 0.22;
+    }
+
+    // ===== FALL =====
+    if(player.position.y < -20){
+
+        respawn();
+    }
+
+    // ===== COINS =====
+    for(let i=coins.length-1;i>=0;i--){
+
+        const coin = coins[i];
+
+        coin.rotation.y += 0.05;
+
+        const dx =
+            player.position.x -
+            coin.position.x;
+
+        const dy =
+            player.position.y -
+            coin.position.y;
+
+        const dz =
+            player.position.z -
+            coin.position.z;
+
+        const dist =
+            Math.sqrt(dx*dx + dy*dy + dz*dz);
+
+        if(dist < 1.5){
+
+            scene.remove(coin);
+
+            coins.splice(i,1);
+
+            score++;
+
+            coinText.innerText =
+                "Coins: " + score;
+        }
+    }
+
+    // ===== FINISH =====
+    const finishDist = Math.hypot(
+        player.position.x - finish.position.x,
+        player.position.y - finish.position.y,
+        player.position.z - finish.position.z
+    );
+
+    if(finishDist < 3){
+
+        currentLevel++;
+
+        if(currentLevel > 2){
+
+            currentLevel = 1;
+        }
+
+        levelText.innerText =
+            "Level: " + currentLevel;
+
+        loadLevel(currentLevel);
+    }
+
+    // ===== CAMERA =====
+    const distance = 10;
+    const height = 5;
+
+    camera.position.x =
+        player.position.x - Math.sin(cameraAngle) * distance;
+
+    camera.position.z =
+        player.position.z - Math.cos(cameraAngle) * distance;
+
+    camera.position.y =
+        player.position.y + height;
+
+    camera.lookAt(player.position);
+
+    renderer.render(scene,camera);
+}
+
+animate();
+
+// ===== RESIZE =====
+window.addEventListener("resize",()=>{
+
+    camera.aspect =
+        window.innerWidth/window.innerHeight;
+
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(
+        window.innerWidth,
+        window.innerHeight
+    );
+});
+</script>
+
+</body>
+</html>
